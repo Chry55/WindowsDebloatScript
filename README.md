@@ -14,7 +14,7 @@ Main functions:
 7) And more...
 
 Instructions for use:
-1) Unzip the archive on C:/;
+1) Unzip the archive inside C:/;
 2) Run .bat file as admin;
 3) Reboot PC once all finished;
 4) Enjoy.
