@@ -10,7 +10,7 @@ Main functions:
 3) Disable GameDVR;
 4) Gaming and network tweaks;
 5) Disable hibernation (optional);
-6) Disable bing search;
+6) Disable Bing search;
 7) And more...
 
 Instructions for use:
