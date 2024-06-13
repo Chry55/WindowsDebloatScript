@@ -50,19 +50,10 @@ Write-Host "Disabling Telemetry..."
                 New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" | Out-Null
             }
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Name "DODownloadMode" -Type DWord -Value 1
-            Write-Host "Stopping and disabling Diagnostics Tracking Service..."
-            Stop-Service "DiagTrack" -WarningAction SilentlyContinue
-            Set-Service "DiagTrack" -StartupType Disabled
-            Write-Host "Stopping and disabling WAP Push Service..."
-            Stop-Service "dmwappushservice" -WarningAction SilentlyContinue
-            Set-Service "dmwappushservice" -StartupType Disabled
             Write-Host "Enabling F8 boot menu options..."
             bcdedit /set `{current`} bootmenupolicy Legacy | Out-Null
             Write-Host "Disabling Remote Assistance..."
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance" -Name "fAllowToGetHelp" -Type DWord -Value 0
-            Write-Host "Stopping and disabling Superfetch service..."
-            Stop-Service "SysMain" -WarningAction SilentlyContinue
-            Set-Service "SysMain" -StartupType Disabled
 
             # Task Manager Details
             If ((get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -Name CurrentBuild).CurrentBuild -lt 22557) {
@@ -146,10 +137,6 @@ Write-Host "Disabling Telemetry..."
                 Remove-Item "$autoLoggerDir\AutoLogger-Diagtrack-Listener.etl"
             }
             icacls $autoLoggerDir /deny SYSTEM:`(OI`)`(CI`)F | Out-Null
-
-            Write-Host "Stopping and disabling Diagnostics Tracking Service..."
-            Stop-Service "DiagTrack"
-            Set-Service "DiagTrack" -StartupType Disabled
 
             Write-Host "Doing Security checks for Administrator Account and Group Policy"
             if (([System.Security.Principal.WindowsIdentity]::GetCurrent().Name).IndexOf('Administrator') -eq -1) {
@@ -241,6 +228,14 @@ Stop-Service -Name $service.Name -PassThru
 		Set-Service $service.Name -StartupType Manual
 		"Stopping service $($service.Name)" | Out-File -FilePath c:\windows\LogFirstRun.txt -Append -NoClobber
 }
+Stop-Service "DiagTrack" -WarningAction SilentlyContinue
+Set-Service "DiagTrack" -StartupType Disabled
+Stop-Service "SysMain" -WarningAction SilentlyContinue
+Set-Service "SysMain" -StartupType Disabled
+Stop-Service "dmwappushservice" -WarningAction SilentlyContinue
+Set-Service "dmwappushservice" -StartupType Disabled
+Stop-Service "WSearch" -WarningAction SilentlyContinue
+Set-Service "WSearch" -StartupType Disabled
 
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableActivityFeed" -Type DWord -Value 0
 Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "PublishUserActivities" -Type DWord -Value 0
@@ -256,6 +251,11 @@ dism /Online /Set-ReservedStorageState /State:Disabled
 
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet" /v "SubmitSamplesConsent" /t REG_DWORD /d "2" /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet" /v "SpynetReporting" /t REG_DWORD /d "0" /f
+
+reg add "HKCU\Software\Policies\Microsoft\Windows\EdgeUI" /v "DisableMFUTracking" /t REG_DWORD /d "1" /f
+reg add "HKLM\Software\Policies\Microsoft\Windows\EdgeUI" /v "DisableMFUTracking" /t REG_DWORD /d "1" /f
+
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d "0" /f
 
 $confirmation = Read-Host "do you want to disable hibernation? (not recommended for laptop users) y/n"
 if ($confirmation -eq 'y') {
